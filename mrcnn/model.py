@@ -2151,10 +2151,12 @@ class MaskRCNN():
                                 md5_hash='a268eb855778b3df3c7506639542a6af')
         return weights_path
 
-    def dice_coef(y_true, y_pred, smooth=1):
-    	intersection = K.sum(y_true * y_pred, axis=[1,2,3])
-    	union = K.sum(y_true, axis=[1,2,3]) + K.sum(y_pred, axis=[1,2,3])
-    	return K.mean( (2. * intersection + smooth) / (union + smooth), axis=0)
+    def dice_coef(y_true, y_pred, smooth=1.):
+    	tflat = K.flatten(y_true)
+    	pflat = K.flatten(y_pred)
+    	intersection = K.sum(tflat * pflat)
+    	union = K.sum(tflat) + K.sum(pflat)
+    	return ((2.0 * intersection + smooth) / (union + smooth))
 
     def compile(self, learning_rate, momentum):
         """Gets the model ready for training. Adds losses, regularization, and
