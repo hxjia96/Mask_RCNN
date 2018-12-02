@@ -2151,12 +2151,12 @@ class MaskRCNN():
                                 md5_hash='a268eb855778b3df3c7506639542a6af')
         return weights_path
 
-    def dice_coef(y_true, y_pred, smooth=1.):
-    	tflat = K.flatten(y_true)
-    	pflat = K.flatten(y_pred)
-    	intersection = K.sum(tflat * pflat)
-    	union = K.sum(tflat) + K.sum(pflat)
-    	return ((2.0 * intersection + smooth) / (union + smooth))
+#     def dice_coef(y_true, y_pred, smooth=1.):
+#     	tflat = K.flatten(y_true)
+#     	pflat = K.flatten(y_pred)
+#     	intersection = K.sum(tflat * pflat)
+#     	union = K.sum(tflat) + K.sum(pflat)
+#     	return ((2.0 * intersection + smooth) / (union + smooth))
 
     def compile(self, learning_rate, momentum):
         """Gets the model ready for training. Adds losses, regularization, and
@@ -2193,19 +2193,18 @@ class MaskRCNN():
         # Compile
         self.keras_model.compile(
             optimizer=optimizer,
-            loss=[None] * len(self.keras_model.outputs),
-            metrics=[self.dice_coef])
+            loss=[None] * len(self.keras_model.outputs))
 
         # Add metrics for losses
-#         for name in loss_names:
-#             if name in self.keras_model.metrics_names:
-#                 continue
-#             layer = self.keras_model.get_layer(name)
-#             self.keras_model.metrics_names.append(name)
-#             loss = (
-#                 tf.reduce_mean(layer.output, keepdims=True)
-#                 * self.config.LOSS_WEIGHTS.get(name, 1.))
-#             self.keras_model.metrics_tensors.append(loss)
+        for name in loss_names:
+            if name in self.keras_model.metrics_names:
+                continue
+            layer = self.keras_model.get_layer(name)
+            self.keras_model.metrics_names.append(name)
+            loss = (
+                tf.reduce_mean(layer.output, keepdims=True)
+                * self.config.LOSS_WEIGHTS.get(name, 1.))
+            self.keras_model.metrics_tensors.append(loss)
 
     def set_trainable(self, layer_regex, keras_model=None, indent=0, verbose=1):
         """Sets model layers as trainable if their names match
