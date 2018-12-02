@@ -2151,6 +2151,11 @@ class MaskRCNN():
                                 md5_hash='a268eb855778b3df3c7506639542a6af')
         return weights_path
 
+    def dice_coef(y_true, y_pred, smooth=1):
+    	intersection = K.sum(y_true * y_pred, axis=[1,2,3])
+    	union = K.sum(y_true, axis=[1,2,3]) + K.sum(y_pred, axis=[1,2,3])
+    	return K.mean( (2. * intersection + smooth) / (union + smooth), axis=0)
+
     def compile(self, learning_rate, momentum):
         """Gets the model ready for training. Adds losses, regularization, and
         metrics. Then calls the Keras compile() function.
@@ -2186,7 +2191,8 @@ class MaskRCNN():
         # Compile
         self.keras_model.compile(
             optimizer=optimizer,
-            loss=[None] * len(self.keras_model.outputs))
+            loss=[None] * len(self.keras_model.outputs),
+	    metrics=[dice_coef])
 
         # Add metrics for losses
         for name in loss_names:
